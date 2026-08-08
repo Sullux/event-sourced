@@ -1,0 +1,14 @@
+description: |
+  The **`daemon`** domain defines event-sourced lifecycle events for the `@sullux/event-engine-daemon` runner and its registered plugins.
+
+persisted: true
+replicated: false
+
+$defs:
+  pluginName:
+    type: string
+    minLength: 1
+
+$schema:
+  $version: 1.0.0
+  $namespace: daemon

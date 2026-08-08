@@ -1,0 +1,4 @@
+$merge: schedule
+description: |
+  Emitted when a new delayed or recurring schedule is registered in the engine.
+$factory: true

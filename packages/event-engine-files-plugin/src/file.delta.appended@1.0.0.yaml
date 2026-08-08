@@ -1,0 +1,17 @@
+$merge: file
+description: |
+  Emitted when an incremental patch or delta blob is appended to a link's content stack.
+
+$partitionKey: "({ linkId }) => 'link#' + linkId"
+$deduplicationId: "({ linkId, patchBlobId }) => linkId + '#' + patchBlobId"
+
+type: object
+properties:
+  linkId:
+    $ref: uuid
+    type: string
+  patchBlobId:
+    type: string
+
+required: [linkId, patchBlobId]
+additionalProperties: false

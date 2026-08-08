@@ -1,0 +1,5 @@
+$merge: file.link
+description: |
+  Emitted when an existing VFS link is updated with a replacement blob, block re-stitching, or appended patch.
+$factory: true
+required: [linkId, path]

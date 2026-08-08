@@ -1,0 +1,54 @@
+$merge: file
+description: |
+  A `Link` represents a Virtual Filesystem (VFS) entry binding a path/filename to underlying CAS blobs, blocks, or patches.
+
+$partitionKey: "({ path }) => 'path#' + path"
+$deduplicationId: "({ linkId }) => linkId"
+
+type: object
+properties:
+  linkId:
+    $ref: uuid
+    type: string
+  path:
+    type: string
+    description: Virtual directory path (e.g. /documents/notes.txt).
+  blobId:
+    type: string
+    description: Single CAS content blob ID.
+  blocks:
+    type: array
+    description: Ordered list of constituent block blobs.
+    items:
+      type: object
+      properties:
+        blobId: { type: string }
+        offset: { type: number }
+        bytes: { type: number }
+      required: [blobId]
+  patches:
+    type: array
+    description: Ordered list of delta patches applied on top of a base blob.
+    items:
+      type: object
+      properties:
+        blobId: { type: string }
+        appliedAt: { type: number }
+      required: [blobId]
+
+required: [linkId, path]
+additionalProperties: false
+
+$dbSchema:
+  links:
+    tableName: file_links
+    columns:
+      linkId:
+        name: link_id
+        dbtype: "varchar(32) PRIMARY KEY"
+      path: "varchar(255) NOT NULL"
+      blobId:
+        name: blob_id
+        dbtype: "varchar(64)"
+      blocks: "TEXT"
+      patches: "TEXT"

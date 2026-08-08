@@ -1,0 +1,17 @@
+$merge: file
+description: |
+  Emitted when a VFS path is deleted, decrementing active link counts on referenced blobs/blocks.
+
+$partitionKey: "({ linkId }) => 'link#' + linkId"
+$deduplicationId: "({ linkId }) => linkId"
+
+type: object
+properties:
+  linkId:
+    $ref: uuid
+    type: string
+  path:
+    type: string
+
+required: [linkId, path]
+additionalProperties: false

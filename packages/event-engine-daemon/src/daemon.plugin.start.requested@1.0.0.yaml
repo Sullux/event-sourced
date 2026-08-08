@@ -1,0 +1,17 @@
+$merge: daemon
+description: |
+  Emitted to signal a specific plugin to perform its startup logic.
+$factory: true
+
+$partitionKey: "({ plugin }) => 'daemon#plugin#' + plugin"
+$deduplicationId: "({ plugin }) => 'daemon#plugin#start#requested#' + plugin"
+
+type: object
+properties:
+  plugin:
+    $ref: "#/$defs/pluginName"
+  config:
+    type: object
+
+required: [plugin]
+additionalProperties: false

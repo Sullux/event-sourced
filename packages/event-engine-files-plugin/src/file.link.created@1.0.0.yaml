@@ -1,0 +1,4 @@
+$merge: file.link
+description: |
+  Emitted when a new Virtual Filesystem (VFS) link or file path is created.
+$factory: true

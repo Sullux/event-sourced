@@ -1,0 +1,17 @@
+$merge: schedule
+description: |
+  Emitted when a triggered schedule's target event or action successfully completes execution.
+
+$partitionKey: "({ scheduleId }) => 'schedule#' + scheduleId"
+$deduplicationId: "({ scheduleId, occurrenceTimestamp }) => scheduleId + '#completed#' + occurrenceTimestamp"
+
+type: object
+properties:
+  scheduleId:
+    $ref: uuid
+    type: string
+  occurrenceTimestamp:
+    type: number
+
+required: [scheduleId, occurrenceTimestamp]
+additionalProperties: false

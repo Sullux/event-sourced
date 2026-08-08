@@ -1,0 +1,20 @@
+$merge: file
+description: |
+  Emitted when a chunk of a multipart blob write is successfully ingested.
+
+$partitionKey: "({ blobId }) => 'blob#' + blobId"
+$deduplicationId: "({ blobId, offset }) => blobId + '#' + offset"
+
+type: object
+properties:
+  blobId:
+    type: string
+  offset:
+    type: number
+  bytes:
+    type: number
+  sha256:
+    type: string
+
+required: [blobId, offset, bytes]
+additionalProperties: false

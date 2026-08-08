@@ -1,0 +1,4 @@
+$merge: file.blob
+description: |
+  Emitted when a blob payload is allocated or registered prior to full binary upload.
+$factory: true

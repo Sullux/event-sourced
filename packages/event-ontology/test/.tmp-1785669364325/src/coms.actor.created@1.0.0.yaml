@@ -1,0 +1,7 @@
+
+$merge: coms.actor
+description: "Emitted when a [[coms.actor]] is created"
+$factory: "(payload, db, context) => ({ ...payload, id: context.utils.uuid() })"
+$validate: "async (payload, db, context) => payload.name === 'bad' ? ['name is bad'] : []"
+$projections: "({ payload }, db) => db.query('INSERT INTO coms_actors VALUES ($id, $name, $type)', payload)"
+$sideeffects: "({ payload }, db, context) => context.utils.notify(payload)"

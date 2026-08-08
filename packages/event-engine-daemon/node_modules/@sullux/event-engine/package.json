@@ -1,0 +1,20 @@
+{
+  "name": "@sullux/event-engine",
+  "version": "1.0.0",
+  "description": "Stateful, crash-safe local-first event-sourcing and projection engine",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./ulid": "./lib/ulid.js",
+    "./db/sqlite": "./drivers/db/sqlite.js",
+    "./db/memory": "./drivers/db/memory.js",
+    "./fs/local": "./drivers/fs/local.js",
+    "./fs/memory": "./drivers/fs/memory.js",
+    "./fs/s3": "./drivers/fs/s3.js"
+  },
+  "scripts": {
+    "test": "node --test test/**/*.test.js"
+  },
+  "dependencies": {},
+  "private": true
+}

@@ -1,0 +1,19 @@
+$merge: file
+description: |
+  Emitted when a VFS path is renamed or moved without modifying underlying blob payloads.
+
+$partitionKey: "({ linkId }) => 'link#' + linkId"
+$deduplicationId: "({ linkId, newPath }) => linkId + '#' + newPath"
+
+type: object
+properties:
+  linkId:
+    $ref: uuid
+    type: string
+  oldPath:
+    type: string
+  newPath:
+    type: string
+
+required: [linkId, oldPath, newPath]
+additionalProperties: false

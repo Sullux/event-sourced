@@ -1,0 +1,5 @@
+$merge: schedule
+description: |
+  Emitted when an active schedule's cron expression, target timestamp, or target event is updated.
+$factory: true
+required: [scheduleId]

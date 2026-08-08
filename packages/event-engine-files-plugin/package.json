@@ -1,0 +1,15 @@
+{
+  "name": "@sullux/event-engine-files-plugin",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "build": "node ../event-ontology/bin/event-ontology.js build",
+    "test": "node --test test/**/*.test.js"
+  },
+  "dependencies": {
+    "@sullux/event-engine": "file:../event-engine",
+    "@sullux/event-ontology": "file:../event-ontology",
+    "ajv": "^8.20.0"
+  }
+}

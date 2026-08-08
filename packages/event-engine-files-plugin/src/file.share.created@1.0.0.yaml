@@ -1,0 +1,20 @@
+$merge: file
+description: |
+  Emitted when a share link or external access token is created for a file or folder.
+
+$partitionKey: "({ shareId }) => 'share#' + shareId"
+$deduplicationId: shareId
+
+type: object
+properties:
+  shareId:
+    $ref: uuid
+    type: string
+  linkId:
+    $ref: uuid
+    type: string
+  expiresAt:
+    type: number
+
+required: [shareId, linkId]
+additionalProperties: false

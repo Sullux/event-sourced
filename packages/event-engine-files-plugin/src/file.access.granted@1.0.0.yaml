@@ -1,0 +1,19 @@
+$merge: file
+description: |
+  Emitted when read or write access permissions are granted on a path or link to an actor.
+
+$partitionKey: "({ targetId }) => 'access#' + targetId"
+$deduplicationId: "({ targetId, actorId, permission }) => targetId + '#' + actorId + '#' + permission"
+
+type: object
+properties:
+  targetId:
+    type: string
+  actorId:
+    type: string
+  permission:
+    type: string
+    enum: [read, write, admin]
+
+required: [targetId, actorId, permission]
+additionalProperties: false
