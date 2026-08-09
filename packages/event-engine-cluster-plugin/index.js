@@ -1,42 +1,19 @@
+const compiledOntology = require('./dist/index')
 const { ClusteredEngine } = require('./lib/clustered-engine')
 const { ClusterMesh } = require('./lib/mesh')
 const { eventHash } = require('./lib/hash-chain')
 
 const pluginName = '@sullux/event-engine-cluster-plugin'
 
-const definitions = [
-  {
-    type: 'cluster.proposal.emitted',
-    version: '1.0.0',
-    persisted: false,
-    replicated: false,
-    validate: (p) => { if (!p?.event) throw new Error('cluster proposal requires event') },
-  },
-  {
-    type: 'cluster.ack.emitted',
-    version: '1.0.0',
-    persisted: false,
-    replicated: false,
-    validate: (p) => { if (!p?.eventId) throw new Error('cluster ack requires eventId') },
-  },
-  {
-    type: 'cluster.sync.requested',
-    version: '1.0.0',
-    persisted: false,
-    replicated: false,
-    validate: () => {},
-  },
-]
-
 let activeMesh = null
 
 const sideEffects = [
   {
     predicate: {
-      '.type': 'node.daemon.plugin.start.requested',
+      '.type': 'daemon.plugin.start.requested',
       '.payload.plugin': pluginName,
     },
-    handler: async (event) => {
+    handler: async (event, { engine }) => {
       const config = event.payload?.config || {}
       if (config.port && !activeMesh) {
         activeMesh = ClusterMesh({
@@ -47,17 +24,33 @@ const sideEffects = [
         })
         await activeMesh.start()
       }
+
+      if (engine) {
+        await engine.ingress({
+          type: 'daemon.plugin.started',
+          version: '1.0.0',
+          payload: { plugin: pluginName, startedAt: Date.now() },
+        })
+      }
     },
   },
   {
     predicate: {
-      '.type': 'node.daemon.plugin.stop.requested',
+      '.type': 'daemon.plugin.stop.requested',
       '.payload.plugin': pluginName,
     },
-    handler: async () => {
+    handler: async (event, { engine }) => {
       if (activeMesh) {
         await activeMesh.stop()
         activeMesh = null
+      }
+
+      if (engine) {
+        await engine.ingress({
+          type: 'daemon.plugin.stopped',
+          version: '1.0.0',
+          payload: { plugin: pluginName, stoppedAt: Date.now() },
+        })
       }
     },
   },
@@ -66,9 +59,9 @@ const sideEffects = [
 module.exports = {
   name: pluginName,
   version: '1.0.0',
-  definitions,
-  upcasters: {},
-  projections: [],
+  definitions: compiledOntology.definitions,
+  upcasters: compiledOntology.upcasters || {},
+  projections: compiledOntology.projections || [],
   sideEffects,
   ClusteredEngine,
   ClusterMesh,

@@ -4,10 +4,15 @@
   "description": "Leaderless 2-of-3 Quorum Mesh Replication Plugin for @sullux/event-engine",
   "main": "index.js",
   "scripts": {
+    "build": "event-ontology build",
+    "pretest": "yarn build",
     "test": "node --test test/**/*.test.js"
   },
   "dependencies": {
     "@sullux/event-engine": "file:../event-engine"
+  },
+  "devDependencies": {
+    "@sullux/event-ontology": "file:../event-ontology"
   },
   "license": "MIT"
 }

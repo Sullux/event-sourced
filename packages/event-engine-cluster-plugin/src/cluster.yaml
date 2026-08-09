@@ -1,0 +1,4 @@
+type: cluster
+version: 1.0.0
+description: Core event definitions for leaderless quorum mesh cluster replication.
+$factory: true

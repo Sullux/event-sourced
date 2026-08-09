@@ -1,0 +1,11 @@
+$merge: cluster
+description: Emitted when a cluster node proposes an event to peers for quorum consensus.
+$factory: true
+
+type: object
+properties:
+  event:
+    type: object
+    description: The proposed event object.
+required: [event]
+additionalProperties: true

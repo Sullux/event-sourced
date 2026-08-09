@@ -1,4 +1,5 @@
 const { EventsEngine } = require('@sullux/event-engine')
+const compiledOntology = require('../dist/index')
 const { ClusterMesh } = require('./mesh')
 
 const ClusteredEngine = (options = {}) => {
@@ -41,6 +42,10 @@ const ClusteredEngine = (options = {}) => {
     db,
     effects: mergedEffects,
   })
+
+  if (Array.isArray(compiledOntology.definitions)) {
+    compiledOntology.definitions.forEach((def) => innerEngine.registerDefinition(def))
+  }
 
   mesh = ClusterMesh({
     nodeId,
