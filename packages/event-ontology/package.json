@@ -1,0 +1,46 @@
+{
+  "name": "@sullux/event-ontology",
+  "version": "1.0.0",
+  "description": "YAML-based event ontology compiler, validator, and projection DDL generator toolchain.",
+  "main": "index.js",
+  "bin": {
+    "event-ontology": "./bin/event-ontology.js"
+  },
+  "scripts": {
+    "build": "node build.js",
+    "deploy": "./deploy.sh",
+    "test": "node --test test/**/*.test.js"
+  },
+  "author": "Charles Sullivan <charles@sullux.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sullux/event-sourced.git",
+    "directory": "packages/event-ontology"
+  },
+  "bugs": {
+    "url": "https://github.com/Sullux/event-sourced/issues"
+  },
+  "homepage": "https://github.com/Sullux/event-sourced/tree/main/packages/event-ontology#readme",
+  "keywords": [
+    "event-ontology",
+    "compiler",
+    "yaml",
+    "schema",
+    "validation",
+    "ddl",
+    "projections",
+    "event-sourcing"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "dependencies": {
+    "ajv": "^8.20.0",
+    "js-yaml": "^4.1.0"
+  }
+}

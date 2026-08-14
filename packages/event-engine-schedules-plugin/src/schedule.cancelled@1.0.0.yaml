@@ -1,0 +1,17 @@
+$merge: schedule
+description: |
+  Emitted when a schedule is permanently cancelled.
+
+$partitionKey: "({ scheduleId }) => 'schedule#' + scheduleId"
+$deduplicationId: scheduleId
+
+type: object
+properties:
+  scheduleId:
+    $ref: uuid
+    type: string
+  reason:
+    type: string
+
+required: [scheduleId]
+additionalProperties: false

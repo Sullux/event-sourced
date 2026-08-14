@@ -1,0 +1,4 @@
+$merge: file.blob
+description: |
+  Emitted when a blob's storage write is finished and payload checksum integrity is verified.
+$factory: true

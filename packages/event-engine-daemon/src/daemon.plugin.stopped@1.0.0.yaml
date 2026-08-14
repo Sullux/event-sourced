@@ -1,0 +1,17 @@
+$merge: daemon
+description: |
+  Emitted by a plugin to confirm it has finished its cleanup and stopped.
+$factory: true
+
+$partitionKey: "({ plugin }) => 'daemon#plugin#' + plugin"
+$deduplicationId: "({ plugin }) => 'daemon#plugin#stopped#' + plugin"
+
+type: object
+properties:
+  plugin:
+    $ref: "#/$defs/pluginName"
+  stoppedAt:
+    type: number
+
+required: [plugin, stoppedAt]
+additionalProperties: false

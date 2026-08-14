@@ -1,0 +1,15 @@
+$merge: file
+description: |
+  Emitted when an active share token is revoked.
+
+$partitionKey: "({ shareId }) => 'share#' + shareId"
+$deduplicationId: shareId
+
+type: object
+properties:
+  shareId:
+    $ref: uuid
+    type: string
+
+required: [shareId]
+additionalProperties: false

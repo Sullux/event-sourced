@@ -1,0 +1,26 @@
+$merge: file
+description: |
+  Emitted when a directory node is created in the Virtual Filesystem tree.
+
+$partitionKey: "({ path }) => 'path#' + path"
+$deduplicationId: "({ path }) => path"
+
+type: object
+properties:
+  directoryId:
+    $ref: uuid
+    type: string
+  path:
+    type: string
+
+required: [directoryId, path]
+additionalProperties: false
+
+$dbSchema:
+  directories:
+    tableName: file_directories
+    columns:
+      directoryId:
+        name: directory_id
+        dbtype: "varchar(32) PRIMARY KEY"
+      path: "varchar(255) NOT NULL UNIQUE"

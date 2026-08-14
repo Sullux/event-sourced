@@ -1,0 +1,26 @@
+$merge: schedule
+description: |
+  Emitted by a scheduler node when time T arrives. Carries the occurrence timestamp and target event payload.
+
+$partitionKey: "({ scheduleId }) => 'schedule#' + scheduleId"
+$deduplicationId: "({ scheduleId, occurrenceTimestamp }) => scheduleId + '#' + occurrenceTimestamp"
+
+type: object
+properties:
+  scheduleId:
+    $ref: uuid
+    type: string
+  occurrenceTimestamp:
+    type: number
+    description: Epoch millisecond timestamp of this specific trigger occurrence.
+  targetEvent:
+    type: object
+    properties:
+      type: { type: string }
+      version: { type: string }
+      payload: { type: object }
+    required: [type, payload]
+    additionalProperties: false
+
+required: [scheduleId, occurrenceTimestamp, targetEvent]
+additionalProperties: false

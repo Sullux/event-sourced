@@ -1,0 +1,16 @@
+$merge: file
+description: |
+  Emitted by garbage collection when an unlinked blob is permanently deleted from storage.
+
+$partitionKey: "({ blobId }) => 'blob#' + blobId"
+$deduplicationId: blobId
+
+type: object
+properties:
+  blobId:
+    type: string
+  reason:
+    type: string
+
+required: [blobId]
+additionalProperties: false

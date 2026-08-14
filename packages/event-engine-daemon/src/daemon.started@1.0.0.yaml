@@ -1,0 +1,19 @@
+$merge: daemon
+description: |
+  Emitted when all configured plugins have successfully started and the daemon is fully operational.
+$factory: true
+
+$partitionKey: "() => 'daemon#lifecycle'"
+$deduplicationId: "() => 'daemon#started'"
+
+type: object
+properties:
+  plugins:
+    type: array
+    items:
+      type: string
+  startedAt:
+    type: number
+
+required: [plugins, startedAt]
+additionalProperties: false

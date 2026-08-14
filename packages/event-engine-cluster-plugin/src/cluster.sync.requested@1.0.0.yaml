@@ -1,0 +1,10 @@
+$merge: cluster
+description: Emitted when a node requests catch-up sync from peer nodes.
+$factory: true
+
+type: object
+properties:
+  fromUlid:
+    type: string
+    description: ULID threshold for catch-up query.
+additionalProperties: true

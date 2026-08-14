@@ -1,0 +1,62 @@
+description: |
+  The **`schedule`** library defines a complete ontology for event-sourced timers, cron expressions, delayed event dispatches, and job tracking.
+
+persisted: true
+replicated: true
+
+$defs:
+  uuid:
+    type: string
+    minLength: 1
+
+$schema:
+  $version: 1.0.0
+  $namespace: schedule
+
+$partitionKey: "({ scheduleId }) => 'schedule#' + scheduleId"
+$deduplicationId: scheduleId
+
+type: object
+properties:
+  scheduleId:
+    $ref: uuid
+    type: string
+  name:
+    type: string
+    description: Human-readable schedule identifier or description.
+  cron:
+    type: string
+    description: Standard 5-field cron expression (e.g. "0 9 * * *").
+  at:
+    type: number
+    description: Millisecond timestamp from epoch for one-off scheduled triggers.
+  targetEvent:
+    type: object
+    description: The event type, version, and payload to emit when triggered.
+    properties:
+      type: { type: string }
+      version: { type: string }
+      payload: { type: object }
+    required: [type, payload]
+    additionalProperties: false
+  status:
+    type: string
+    enum: [active, paused, completed, cancelled]
+
+required: [scheduleId, targetEvent]
+additionalProperties: false
+
+$dbSchema:
+  schedules:
+    tableName: engine_schedules
+    columns:
+      scheduleId:
+        name: schedule_id
+        dbtype: "varchar(32) PRIMARY KEY"
+      name: "varchar(128)"
+      cron: "varchar(64)"
+      at: "bigint"
+      targetEvent:
+        name: target_event
+        dbtype: "TEXT NOT NULL"
+      status: "varchar(16) NOT NULL DEFAULT 'active'"

@@ -1,0 +1,15 @@
+$merge: daemon
+description: |
+  Emitted when all plugins have stopped and the daemon process completes shutdown.
+$factory: true
+
+$partitionKey: "() => 'daemon#lifecycle'"
+$deduplicationId: "() => 'daemon#stopped'"
+
+type: object
+properties:
+  stoppedAt:
+    type: number
+
+required: [stoppedAt]
+additionalProperties: false

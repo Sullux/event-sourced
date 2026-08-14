@@ -1,0 +1,40 @@
+$merge: file
+description: |
+  A `Blob` is an immutable binary data asset stored in Content-Addressable Storage (CAS) and indexed by content hash.
+
+$partitionKey: "({ blobId }) => 'blob#' + blobId"
+$deduplicationId: blobId
+
+type: object
+properties:
+  blobId:
+    type: string
+    description: Content hash (e.g. SHA-256 or BLAKE3) identifying this immutable blob.
+  sizeInBytes:
+    type: number
+    description: Total payload byte length.
+  contentType:
+    type: string
+    description: Optional MIME type hint.
+  type:
+    type: string
+    enum: [raw, manifest]
+    description: Specifies if this is a raw data blob or a composite manifest listing child blobs.
+
+required: [blobId, sizeInBytes]
+additionalProperties: false
+
+$dbSchema:
+  blobs:
+    tableName: file_blobs
+    columns:
+      blobId:
+        name: blob_id
+        dbtype: "varchar(64) PRIMARY KEY"
+      sizeInBytes:
+        name: size_in_bytes
+        dbtype: "integer NOT NULL"
+      contentType:
+        name: content_type
+        dbtype: "varchar(64)"
+      type: "varchar(16) DEFAULT 'raw'"

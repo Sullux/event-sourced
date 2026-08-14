@@ -1,0 +1,17 @@
+$merge: daemon
+description: |
+  Emitted when the daemon process begins its boot sequence.
+$factory: true
+
+$partitionKey: "() => 'daemon#lifecycle'"
+$deduplicationId: "() => 'daemon#start#requested'"
+
+type: object
+properties:
+  plugins:
+    type: array
+    items:
+      type: string
+
+required: [plugins]
+additionalProperties: false

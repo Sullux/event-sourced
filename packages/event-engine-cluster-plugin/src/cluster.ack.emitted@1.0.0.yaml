@@ -1,0 +1,14 @@
+$merge: cluster
+description: Emitted when a peer node acknowledges receipt of a proposed event.
+$factory: true
+
+type: object
+properties:
+  eventId:
+    type: string
+    description: ULID of the acknowledged event.
+  status:
+    type: string
+    description: Status of acknowledgment.
+required: [eventId]
+additionalProperties: true

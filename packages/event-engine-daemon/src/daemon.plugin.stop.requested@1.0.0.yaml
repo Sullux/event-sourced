@@ -1,0 +1,15 @@
+$merge: daemon
+description: |
+  Emitted to signal a specific plugin to perform its shutdown/cleanup logic.
+$factory: true
+
+$partitionKey: "({ plugin }) => 'daemon#plugin#' + plugin"
+$deduplicationId: "({ plugin }) => 'daemon#plugin#stop#requested#' + plugin"
+
+type: object
+properties:
+  plugin:
+    $ref: "#/$defs/pluginName"
+
+required: [plugin]
+additionalProperties: false

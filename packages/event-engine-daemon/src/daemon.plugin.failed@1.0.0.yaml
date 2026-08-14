@@ -1,0 +1,18 @@
+$merge: daemon
+description: |
+  Emitted by a plugin if it encounters an unrecoverable failure during startup or runtime.
+$factory: true
+
+$partitionKey: "({ plugin }) => 'daemon#plugin#' + plugin"
+
+type: object
+properties:
+  plugin:
+    $ref: "#/$defs/pluginName"
+  reason:
+    type: string
+  failedAt:
+    type: number
+
+required: [plugin, reason, failedAt]
+additionalProperties: false

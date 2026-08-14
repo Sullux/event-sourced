@@ -1,0 +1,8 @@
+
+description: "The coms domain ontology"
+persisted: true
+replicated: true
+$defs:
+  uuid:
+    type: string
+    pattern: "^[0-9a-f]{32}$"

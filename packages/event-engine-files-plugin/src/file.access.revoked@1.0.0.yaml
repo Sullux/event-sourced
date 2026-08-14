@@ -1,0 +1,19 @@
+$merge: file
+description: |
+  Emitted when access permissions are revoked from an actor.
+
+$partitionKey: "({ targetId }) => 'access#' + targetId"
+$deduplicationId: "({ targetId, actorId, permission }) => targetId + '#' + actorId + '#' + permission"
+
+type: object
+properties:
+  targetId:
+    type: string
+  actorId:
+    type: string
+  permission:
+    type: string
+    enum: [read, write, admin]
+
+required: [targetId, actorId, permission]
+additionalProperties: false

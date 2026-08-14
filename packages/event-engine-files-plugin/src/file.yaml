@@ -1,0 +1,14 @@
+description: |
+  The **`file`** library defines a complete ontology for content-addressable storage (CAS), virtual filesystems (VFS), versioning, and access control.
+
+persisted: true
+replicated: true
+
+$defs:
+  uuid:
+    type: string
+    minLength: 1
+
+$schema:
+  $version: 1.0.0
+  $namespace: file

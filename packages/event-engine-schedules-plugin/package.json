@@ -1,0 +1,42 @@
+{
+  "name": "@sullux/event-engine-schedules-plugin",
+  "version": "1.0.0",
+  "description": "Cron and delayed schedule triggers plugin for @sullux/event-engine.",
+  "main": "index.js",
+  "scripts": {
+    "build": "node build.js",
+    "deploy": "./deploy.sh",
+    "test": "node --test test/**/*.test.js"
+  },
+  "author": "Charles Sullivan <charles@sullux.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sullux/event-sourced.git",
+    "directory": "packages/event-engine-schedules-plugin"
+  },
+  "bugs": {
+    "url": "https://github.com/Sullux/event-sourced/issues"
+  },
+  "homepage": "https://github.com/Sullux/event-sourced/tree/main/packages/event-engine-schedules-plugin#readme",
+  "keywords": [
+    "event-engine",
+    "schedules",
+    "cron",
+    "timer",
+    "delayed-events",
+    "plugin"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "dependencies": {
+    "@sullux/event-engine": "file:../event-engine",
+    "@sullux/event-ontology": "file:../event-ontology",
+    "ajv": "^8.20.0"
+  }
+}

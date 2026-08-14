@@ -1,0 +1,15 @@
+$merge: schedule
+description: |
+  Emitted when a paused schedule is resumed.
+
+$partitionKey: "({ scheduleId }) => 'schedule#' + scheduleId"
+$deduplicationId: scheduleId
+
+type: object
+properties:
+  scheduleId:
+    $ref: uuid
+    type: string
+
+required: [scheduleId]
+additionalProperties: false
