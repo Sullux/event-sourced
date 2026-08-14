@@ -1,18 +1,43 @@
 {
   "name": "@sullux/event-engine-cluster-plugin",
   "version": "1.0.0",
-  "description": "Leaderless 2-of-3 Quorum Mesh Replication Plugin for @sullux/event-engine",
+  "description": "Leaderless 2-of-3 Quorum Mesh Replication Plugin for @sullux/event-engine.",
   "main": "index.js",
   "scripts": {
-    "build": "event-ontology build",
-    "pretest": "yarn build",
+    "build": "node build.js",
+    "deploy": "./deploy.sh",
     "test": "node --test test/**/*.test.js"
+  },
+  "author": "Charles Sullivan <charles@sullux.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sullux/event-sourced.git",
+    "directory": "packages/event-engine-cluster-plugin"
+  },
+  "bugs": {
+    "url": "https://github.com/Sullux/event-sourced/issues"
+  },
+  "homepage": "https://github.com/Sullux/event-sourced/tree/main/packages/event-engine-cluster-plugin#readme",
+  "keywords": [
+    "event-engine",
+    "cluster",
+    "replication",
+    "quorum",
+    "mesh",
+    "plugin"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
     "@sullux/event-engine": "file:../event-engine"
   },
   "devDependencies": {
     "@sullux/event-ontology": "file:../event-ontology"
-  },
-  "license": "MIT"
+  }
 }
