@@ -1,6 +1,6 @@
 {
   "name": "@sullux/event-engine-daemon",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Daemon process runtime and lifecycle manager for @sullux/event-engine.",
   "main": "index.js",
   "bin": {
@@ -38,8 +38,8 @@
     "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
-    "@sullux/event-engine": "file:../event-engine",
-    "@sullux/event-ontology": "file:../event-ontology",
+    "@sullux/event-engine": "^1.0.0",
+    "@sullux/event-ontology": "^1.0.0",
     "ajv": "^8.20.0"
   }
 }

@@ -1,0 +1,8 @@
+title: "Event Engine Schedules Plugin"
+baseUrl: "/projects/event-sourced/event-engine-schedules-plugin/"
+output: "_site"
+links:
+  - title: "GitHub"
+    url: "https://github.com/Sullux/event-sourced/tree/main/packages/event-engine-schedules-plugin"
+  - title: "NPM"
+    url: "https://www.npmjs.com/package/@sullux/event-engine-schedules-plugin"

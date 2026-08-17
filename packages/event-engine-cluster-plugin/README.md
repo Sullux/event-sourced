@@ -1,50 +1,60 @@
-# @sullux/coms-cluster
+# @sullux/event-engine-cluster-plugin
 
-Leaderless 2-of-3 Quorum Mesh Replication Engine for `@sullux/coms-events`.
+Leaderless 2-of-3 Quorum Mesh Replication Plugin for `@sullux/event-engine` using deterministic SHA-256 hash chains.
 
-## Features
+## Documentation
 
-- **Leaderless 2-of-3 Quorum**: Ensures 100% mathematical certainty of consistency without leader election, split-brain risk, or external coordination daemons (Raft, Paxos, Etcd).
-- **Persistent TCP Mesh**: Sub-millisecond wire framing over Node.js `net` module for fast inter-node communication in Fly.io / 6PN WireGuard private networks.
-- **SHA-256 Event Chain Verification**: Running cryptographic state hash verifying exact append-only log parity across nodes.
-- **Zero Third-Party Dependencies**: Built entirely on Node.js standard modules (`net`, `crypto`).
-- **Functional Composition API**: Higher-order factory `ClusteredEngine` wraps `EventsEngine` cleanly with zero hidden object mutations.
+Full documentation, guides, and schema references are available at:
+[https://sullux.com/projects/event-sourced/event-engine-cluster-plugin/](https://sullux.com/projects/event-sourced/event-engine-cluster-plugin/)
 
-## Usage
+## Installation
 
-### Primary API: `ClusteredEngine`
+```bash
+npm install @sullux/event-engine @sullux/event-engine-cluster-plugin
+# or
+yarn add @sullux/event-engine @sullux/event-engine-cluster-plugin
+```
+
+## Quick Start
 
 ```javascript
-const { ClusteredEngine } = require('@sullux/coms-cluster')
-const { SqliteDb } = require('@sullux/coms-events/db/sqlite')
+const { EventEngine } = require('@sullux/event-engine')
+const { ClusteredEngine } = require('@sullux/event-engine-cluster-plugin')
 
-const db = SqliteDb({ dbPath: './lake.db' })
+const main = async () => {
+  const localEngine = EventEngine({ databasePath: './node-1.db' })
 
-const engine = ClusteredEngine({
-  nodeId: 'node_1',
-  port: 9090,
-  clusterSize: 3,
-  discoverPeers: async () => ['10.0.0.2:9090', '10.0.0.3:9090'],
-  db,
-  eventDefinitions: { ... },
-})
+  // Initialize a 3-node quorum cluster
+  const cluster = ClusteredEngine(localEngine, {
+    nodeId: 'node-1',
+    peers: ['node-2', 'node-3'],
+    transport: {
+      send: async (targetNodeId, message) => {
+        // network transport (e.g. WebSocket, gRPC, HTTP)
+      },
+    },
+  })
 
-await engine.start()
+  // Ingress an event with 2-of-3 quorum consensus
+  const event = await cluster.ingress('order.placed@1.0.0', {
+    orderId: 'ord_9876',
+    amount: 150.00,
+  })
 
-// Ingress automatically replicates to peer nodes and awaits 2-of-3 ACKs
-const receipt = await engine.ingress({
-  type: 'coms.actor.created',
-  version: '1.0.0',
-  payload: { id: 'a1', name: 'Charles' },
-})
+  console.log('Quorum committed event hash:', event.hash)
+}
 
-// Enforce read consistency before running local queries
-await engine.assertConsistent()
-const events = await engine.query({ predicate: { '.type': 'coms.actor.created' } })
+main()
+```
 
-await engine.stop()
+## Contributing
+
+Contributions are welcome! Please ensure all code adheres to project guidelines (Vanilla JS, functional factories, zero external dependencies, 100% test coverage).
+
+```bash
+yarn test
 ```
 
 ## License
 
-MIT
+[MIT](https://sullux.com/projects/event-sourced/event-engine-cluster-plugin/LICENSE) © 2026 Charles Sullivan

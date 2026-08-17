@@ -1,0 +1,8 @@
+title: "Event Ontology"
+baseUrl: "/projects/event-sourced/event-ontology/"
+output: "_site"
+links:
+  - title: "GitHub"
+    url: "https://github.com/Sullux/event-sourced/tree/main/packages/event-ontology"
+  - title: "NPM"
+    url: "https://www.npmjs.com/package/@sullux/event-ontology"
