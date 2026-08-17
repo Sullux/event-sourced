@@ -1,6 +1,6 @@
 {
   "name": "@sullux/event-ontology",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "YAML-based event ontology compiler, validator, and projection DDL generator toolchain.",
   "main": "index.js",
   "bin": {

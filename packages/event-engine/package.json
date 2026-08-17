@@ -1,6 +1,6 @@
 {
   "name": "@sullux/event-engine",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Stateful, crash-safe local-first event-sourcing and projection engine.",
   "main": "index.js",
   "exports": {

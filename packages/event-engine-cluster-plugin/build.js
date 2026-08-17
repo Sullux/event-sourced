@@ -59,7 +59,7 @@ const deploy = () => {
   for (const bin of ontologyBins) {
     if (fs.existsSync(bin)) {
       try {
-        execSync(`node ${bin} build`, { cwd: root, stdio: 'inherit' })
+        execSync(`node ${bin} build --docs ./docs/reference`, { cwd: root, stdio: 'inherit' })
         break
       } catch (err) {
         console.warn(`Ontology compile failed with ${bin}:`, err.message)

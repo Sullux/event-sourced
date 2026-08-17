@@ -1,6 +1,6 @@
 {
   "name": "@sullux/event-engine-cluster-plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Leaderless 2-of-3 Quorum Mesh Replication Plugin for @sullux/event-engine.",
   "main": "index.js",
   "scripts": {
@@ -35,9 +35,9 @@
     "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
-    "@sullux/event-engine": "file:../event-engine"
+    "@sullux/event-engine": "^1.0.0"
   },
   "devDependencies": {
-    "@sullux/event-ontology": "file:../event-ontology"
+    "@sullux/event-ontology": "^1.0.0"
   }
 }
