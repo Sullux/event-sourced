@@ -147,16 +147,27 @@ const createSideEffectProcessor = ({ db, registry, effects, subscriptions, files
               if (sub && sub.handler) effectFn = sub.handler
             }
 
-            if (effectFn) {
-              const runContext = { isReplay: false, isRealtime: true }
-              let evt = null
-              if (db.getEventsFrom) {
-                const matchedEvts = await db.getEventsFrom(rec.eventId)
-                evt = matchedEvts.find(e => e.id === rec.eventId)
-              }
-              const targetEvent = evt || { id: rec.eventId, type: rec.eventType, version: rec.eventVersion }
-              await effectFn(targetEvent, { filesystem, context: runContext })
+            // A row whose handler cannot be resolved must never be retired as succeeded: the work
+            // would be lost while the outbox reported success. Reachable without a crash - a renamed
+            // handler, an ontology that stops declaring the effect, or a drain ordered before
+            // registration. `failed` is the visible outcome (status, attempts, lastError).
+            //
+            // Leaving it `pending` instead is NOT the fix: getPendingSideEffects selects pending
+            // only, and the enclosing loop runs until that comes back empty, so a skipped pending
+            // row is returned forever. Retrying needs a visited guard, which is a separate change.
+            if (!effectFn) {
+              await db.markSideEffectFailed(rec.id, `no handler registered for side effect "${rec.effectName}"`)
+              continue
             }
+
+            const runContext = { isReplay: false, isRealtime: true }
+            const matchedEvts = db.getEventsFrom ? await db.getEventsFrom(rec.eventId) : []
+            const targetEvent = matchedEvts.find(e => e.id === rec.eventId) || {
+              id: rec.eventId,
+              type: rec.eventType,
+              version: rec.eventVersion,
+            }
+            await effectFn(targetEvent, { filesystem, context: runContext })
 
             await db.markSideEffectCompleted(rec.id)
             if (backupMgr) {
