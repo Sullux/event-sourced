@@ -114,76 +114,112 @@ const runSideEffectsDirect = async (event, activeEffects, { registry, effects, f
 }
 
 const createSideEffectProcessor = ({ db, registry, effects, subscriptions, filesystem, backupMgr }) => {
-  let processing = false
+  let activeDrain
+  let rerunRequested = false
+  let scheduledHandle
+  let closing = false
 
-  const processSideEffects = async () => {
-    if (processing || !db.getPendingSideEffects) return
-    processing = true
-
-    try {
-      while (true) {
-        const pending = await db.getPendingSideEffects(50)
-        if (!pending || pending.length === 0) break
-
-        for (const rec of pending) {
-          try {
-            const def = registry.getDefinition(rec.eventType, rec.eventVersion)
-
-            let effectFn = null
-            if (def && Array.isArray(def.effects)) {
-              const matched = def.effects.find(e => (typeof e === 'object' ? e.name === rec.effectName : e === rec.effectName))
-              if (matched) effectFn = typeof matched === 'object' ? matched.run : matched
-            }
-
-            if (!effectFn) {
-              const normalized = normalizeEffects(effects)
-              const matched = normalized.find(e => e.name === rec.effectName)
-              if (matched) effectFn = matched.run
-            }
-
-            if (!effectFn && rec.effectName.startsWith('sub:')) {
-              const subId = rec.effectName.slice(4)
-              const sub = subscriptions.get(subId)
-              if (sub && sub.handler) effectFn = sub.handler
-            }
-
-            // A row whose handler cannot be resolved must never be retired as succeeded: the work
-            // would be lost while the outbox reported success. Reachable without a crash - a renamed
-            // handler, an ontology that stops declaring the effect, or a drain ordered before
-            // registration. `failed` is the visible outcome (status, attempts, lastError).
-            //
-            // Leaving it `pending` instead is NOT the fix: getPendingSideEffects selects pending
-            // only, and the enclosing loop runs until that comes back empty, so a skipped pending
-            // row is returned forever. Retrying needs a visited guard, which is a separate change.
-            if (!effectFn) {
-              await db.markSideEffectFailed(rec.id, `no handler registered for side effect "${rec.effectName}"`)
-              continue
-            }
-
-            const runContext = { isReplay: false, isRealtime: true }
-            const matchedEvts = db.getEventsFrom ? await db.getEventsFrom(rec.eventId) : []
-            const targetEvent = matchedEvts.find(e => e.id === rec.eventId) || {
-              id: rec.eventId,
-              type: rec.eventType,
-              version: rec.eventVersion,
-            }
-            await effectFn(targetEvent, { filesystem, context: runContext })
-
-            await db.markSideEffectCompleted(rec.id)
-            if (backupMgr) {
-              backupMgr.updateSideEffectCursor(rec.eventId)
-            }
-          } catch (err) {
-            await db.markSideEffectFailed(rec.id, err.message)
-          }
-        }
-      }
-    } finally {
-      processing = false
+  const cancelScheduled = () => {
+    if (scheduledHandle !== undefined) {
+      clearImmediate(scheduledHandle)
+      scheduledHandle = undefined
     }
   }
 
-  return { processSideEffects }
+  const drainLoop = async () => {
+    try {
+      do {
+        rerunRequested = false
+        while (true) {
+          const pending = await db.getPendingSideEffects(50)
+          if (!pending || pending.length === 0) break
+
+          for (const rec of pending) {
+            try {
+              const def = registry.getDefinition(rec.eventType, rec.eventVersion)
+
+              let effectFn = null
+              if (def && Array.isArray(def.effects)) {
+                const matched = def.effects.find(e => (typeof e === 'object' ? e.name === rec.effectName : e === rec.effectName))
+                if (matched) effectFn = typeof matched === 'object' ? matched.run : matched
+              }
+
+              if (!effectFn) {
+                const normalized = normalizeEffects(effects)
+                const matched = normalized.find(e => e.name === rec.effectName)
+                if (matched) effectFn = matched.run
+              }
+
+              if (!effectFn && rec.effectName.startsWith('sub:')) {
+                const subId = rec.effectName.slice(4)
+                const sub = subscriptions.get(subId)
+                if (sub && sub.handler) effectFn = sub.handler
+              }
+
+              // A row whose handler cannot be resolved must never be retired as succeeded: the work
+              // would be lost while the outbox reported success. Reachable without a crash - a renamed
+              // handler, an ontology that stops declaring the effect, or a drain ordered before
+              // registration. `failed` is the visible outcome (status, attempts, lastError).
+              //
+              // Leaving it `pending` instead is NOT the fix: getPendingSideEffects selects pending
+              // only, and the enclosing loop runs until that comes back empty, so a skipped pending
+              // row is returned forever. Retrying needs a visited guard, which is a separate change.
+              if (!effectFn) {
+                await db.markSideEffectFailed(rec.id, `no handler registered for side effect "${rec.effectName}"`)
+                continue
+              }
+
+              const runContext = { isReplay: false, isRealtime: true }
+              const matchedEvts = db.getEventsFrom ? await db.getEventsFrom(rec.eventId) : []
+              const targetEvent = matchedEvts.find(e => e.id === rec.eventId) || {
+                id: rec.eventId,
+                type: rec.eventType,
+                version: rec.eventVersion,
+              }
+              await effectFn(targetEvent, { filesystem, context: runContext })
+
+              await db.markSideEffectCompleted(rec.id)
+              if (backupMgr) {
+                backupMgr.updateSideEffectCursor(rec.eventId)
+              }
+            } catch (err) {
+              await db.markSideEffectFailed(rec.id, err.message)
+            }
+          }
+        }
+      } while (rerunRequested)
+    } finally {
+      rerunRequested = false
+      activeDrain = undefined
+    }
+  }
+
+  const processSideEffects = () => {
+    cancelScheduled()
+    if (!db?.getPendingSideEffects) return Promise.resolve()
+    if (activeDrain) {
+      rerunRequested = true
+      return activeDrain
+    }
+    activeDrain = drainLoop()
+    return activeDrain
+  }
+
+  const scheduleSideEffects = () => {
+    if (closing || scheduledHandle !== undefined) return
+    scheduledHandle = setImmediate(() => {
+      scheduledHandle = undefined
+      if (closing) return
+      processSideEffects().catch(err => console.error('[EventEngine SideEffects Error]', err))
+    })
+  }
+
+  const stopScheduling = () => {
+    closing = true
+    cancelScheduled()
+  }
+
+  return { processSideEffects, scheduleSideEffects, stopScheduling }
 }
 
 module.exports = {

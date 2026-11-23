@@ -32,18 +32,19 @@ const EventsEngine = (options = {}) => {
   }
   const backupMgr = createBackupManager({ driver: backup, debounceMs: backupDebounceMs })
 
-  if (db && typeof db.cleanOrphanedDraftEvents === 'function') {
-    db.cleanOrphanedDraftEvents().catch(err => console.error('[EventEngine Boot Cleanup Error]', err))
-  }
+  const bootCleanupPromise =
+    db && typeof db.cleanOrphanedDraftEvents === 'function'
+      ? db.cleanOrphanedDraftEvents().catch(err => console.error('[EventEngine Boot Cleanup Error]', err))
+      : Promise.resolve()
 
   const { subscriptions, subscribe, unsubscribe, subscribeActive } = createSubscriptionsManager({ generateUlid, db })
 
   const runProj = (evt, activeProj, ctx) => runProjections(evt, activeProj, { registry, projections, db, filesystem, context: ctx })
   const runSideEffDirect = (evt, activeEff, ctx) => runSideEffectsDirect(evt, activeEff, { registry, effects, filesystem, context: ctx })
 
-  const { processSideEffects } = createSideEffectProcessor({ db, registry, effects, subscriptions, filesystem, backupMgr })
+  const { processSideEffects, scheduleSideEffects, stopScheduling } = createSideEffectProcessor({ db, registry, effects, subscriptions, filesystem, backupMgr })
 
-  const ingress = createIngress({
+  const rawIngress = createIngress({
     registry,
     generateUlid,
     nowFn,
@@ -56,7 +57,50 @@ const EventsEngine = (options = {}) => {
     runProjections: runProj,
     runSideEffectsDirect: runSideEffDirect,
     processSideEffects,
+    scheduleSideEffects,
   })
+
+  const inFlightIngress = new Set()
+  let isClosing = false
+  let isClosed = false
+  let closePromise
+
+  const ingress = (input) => {
+    if (isClosing) {
+      return Promise.reject(new Error('EventEngine is closed'))
+    }
+    const promise = rawIngress(input)
+    inFlightIngress.add(promise)
+    return promise.finally(() => {
+      inFlightIngress.delete(promise)
+    })
+  }
+
+  const safeProcessSideEffects = () => (isClosed ? Promise.resolve() : processSideEffects())
+
+  const flush = () => {
+    if (closePromise) return closePromise
+    if (isClosed) return Promise.resolve()
+    return processSideEffects()
+  }
+
+  const close = () => {
+    if (closePromise) return closePromise
+    isClosing = true
+    stopScheduling()
+    closePromise = (async () => {
+      await Promise.allSettled([bootCleanupPromise, ...inFlightIngress])
+      await processSideEffects()
+      isClosed = true
+      if (backupMgr) {
+        await backupMgr.close()
+      }
+      if (db && typeof db.close === 'function') {
+        await db.close()
+      }
+    })()
+    return closePromise
+  }
 
   const replay = createReplay({
     db,
@@ -87,7 +131,9 @@ const EventsEngine = (options = {}) => {
     replay,
     query,
     registerDefinition: (def) => registry.registerDefinition(def),
-    processSideEffects,
+    processSideEffects: safeProcessSideEffects,
+    flush,
+    close,
     subscribe,
     unsubscribe,
     subscribeActive,
