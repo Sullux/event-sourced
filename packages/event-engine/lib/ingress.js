@@ -14,6 +14,7 @@ const createIngress = ({
   runProjections,
   runSideEffectsDirect,
   processSideEffects,
+  scheduleSideEffects,
 }) => {
   return async (input) => {
     if (!input || !input.type) {
@@ -164,9 +165,7 @@ const createIngress = ({
     const runContext = { isReplay: false, isRealtime: true }
     if (db.saveSideEffectOutbox) {
       if (asyncSideEffects) {
-        setImmediate(() => {
-          processSideEffects().catch(err => console.error('[EventEngine SideEffects Error]', err))
-        })
+        scheduleSideEffects()
       } else {
         await processSideEffects()
       }

@@ -50,5 +50,8 @@ Performs a bounded one-off query returning matching events array.
 ### `engine.replay(options)`
 Streams historical events matching time bounds or predicates.
 
+### `engine.flush()`
+Cancels any deferred side-effect drain timer and awaits completion of all pending outbox side-effects.
+
 ### `engine.close()`
-Flushes pending side-effects and cleanly closes the database connection.
+Flushes pending side-effects, flushes any pending backup checkpoint, and cleanly closes the database connection.
